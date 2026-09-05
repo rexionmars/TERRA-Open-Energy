@@ -1,0 +1,182 @@
+% =====================================================================
+% estilo-reporte.sty -- identidade do relatorio de andamento
+%
+% MANCHA. A4, margens de 1,9 cm nas laterais e 2,0/2,2 cm no topo e no
+% pe. A mancha fica com 17,2 cm, ou 82% da largura da folha, contra os
+% 12,5 cm (60%) dos documentos de estudo da linha. Com 0,7 cm de
+% medianiz, cada coluna tem 8,25 cm.
+%
+% MEDIDA DE LINHA. Medida, e nao estimada: uma frase de 139 caracteres,
+% composta em IBM Plex Serif a 10 pt, ocupa 659,12 pt, o que da 4,742 pt
+% por caractere. A 8,25 cm a coluna corre a 49,5 caracteres por linha.
+% A faixa confortavel de coluna de periodico vai de 45 a 60.
+%
+% Duas colunas resolvem a exigencia de aproveitar a folha sem alongar a
+% linha: a mancha cresce 38% em largura e a medida de leitura encolhe de
+% ~73 para ~50 caracteres. E a razao de o corpo ficar a 10 pt e nao a
+% 11 pt, que daria 45 caracteres e quebraria palavra longa a cada linha.
+%
+% TABELA DEITADA. Tabela larga nao cabe em coluna de 8,25 cm nem em
+% mancha de 17,2 cm. Os apendices saem do regime de duas colunas e
+% entram em `landscape`, que gira a pagina tambem no leitor de PDF. A
+% largura util ali e a altura da mancha em pe, 25,3 cm.
+%
+% PALETA. Derivada da `terra-mark.png`. O destaque e o verde medio da
+% marca, #658637, terceira cor mais usada dela. A fechada nao vem da
+% marca: nenhum verde dela e escuro o bastante, entao e o mesmo matiz e
+% saturacao rebaixados ate a separacao de claridade que a paleta anterior
+% usava. A tinta2 sai do quase-preto quente #24201B, clareado ate o
+% contraste que a cinza anterior tinha.
+%
+% Sobre papel branco, destaque 4,18:1 e fechada 11,21:1; entre si, 2,68.
+% Os papeis se distinguem por claridade, e nao por matiz.
+%
+% Sem dependencia de pacote externo a este diretorio: um relatorio que
+% nao compila num clone limpo nao e um relatorio.
+% =====================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{estilo-reporte}[2026/09/01 Relatorio de andamento TERRA-Simulation]
+
+\RequirePackage[T1]{fontenc}
+\RequirePackage{plex-serif}
+\RequirePackage[scale=.96]{plex-sans}
+\RequirePackage[scale=.92]{plex-mono}
+
+\RequirePackage{xcolor}
+\RequirePackage{graphicx}
+\RequirePackage{array}
+\RequirePackage{booktabs}
+\RequirePackage{longtable}
+\RequirePackage{pdflscape}
+\RequirePackage{enumitem}
+\RequirePackage{amsmath,amssymb}
+\RequirePackage{microtype}
+\RequirePackage{caption}
+\RequirePackage{tocloft}
+% Enchimento da maquete. Sai quando o texto entrar; enquanto estiver
+% carregado, o PDF mostra a forma do documento e nao o conteudo dele.
+\RequirePackage{lipsum}
+
+% --- cores -----------------------------------------------------------
+\definecolor{destaque}{HTML}{658637}
+\definecolor{fechada}{HTML}{30401A}
+\definecolor{tinta2}{HTML}{595043}
+
+% --- fios e tinta de tabela ------------------------------------------
+\setlength{\heavyrulewidth}{0.6pt}
+\setlength{\lightrulewidth}{0.4pt}
+\setlength{\aboverulesep}{0.35ex}
+\setlength{\belowrulesep}{0.45ex}
+
+% A barra do rotulo em texto, e nao em modo matematico: dentro de
+% tabela a 7,4 pt o modo matematico pede corpo 3,7 e o TeX substitui.
+\DeclareCaptionLabelFormat{natureza}{\textbf{#1~#2~\textbar}}
+\captionsetup{labelformat=natureza, labelsep=space, font={small,sf},
+              labelfont={bf}, justification=raggedright,
+              singlelinecheck=false, skip=4pt}
+
+% --- titulos ---------------------------------------------------------
+% Em coluna de 8,25 cm o titulo nao e justificado nem hifenizado: a
+% justificacao abre buracos e o hifen quebra a palavra no meio.
+\RequirePackage[raggedright]{titlesec}
+
+\titleformat{\part}[display]
+  {\sffamily\bfseries\Huge\filright}
+  {\normalsize\normalfont\sffamily\bfseries\color{destaque}PARTE \thepart}
+  {0.6em}{}
+\titleformat{\chapter}[display]
+  {\sffamily\bfseries\LARGE}
+  % `\chaptertitlename` vira Apêndice depois do `\appendix`, e o rótulo
+  % acompanha sem intervenção.
+  {\normalsize\normalfont\sffamily\color{tinta2}\chaptertitlename\ \thechapter}
+  {0.4em}{\hyphenpenalty=10000\exhyphenpenalty=10000\hbadness=10000 }
+\titlespacing*{\chapter}{0pt}{0pt}{1.2em}
+\titleformat*{\section}{\sffamily\large\bfseries\hyphenpenalty=10000\exhyphenpenalty=10000\hbadness=10000 }
+\titleformat*{\subsection}{\sffamily\normalsize\bfseries\hyphenpenalty=10000\exhyphenpenalty=10000\hbadness=10000 }
+\titleformat*{\subsubsection}{\sffamily\small\bfseries\hyphenpenalty=10000\exhyphenpenalty=10000\hbadness=10000 }
+\titlespacing*{\section}{0pt}{1.4em}{.5em}
+\titlespacing*{\subsection}{0pt}{1.0em}{.4em}
+\titlespacing*{\subsubsection}{0pt}{0.8em}{.3em}
+
+% O sumario acompanha os titulos: sem serifa. Sem isto ele sai na
+% serifada da classe, e e a unica peca do documento fora do padrao.
+\renewcommand{\cfttoctitlefont}{\sffamily\bfseries\Huge}
+\renewcommand{\cftpartfont}{\sffamily\bfseries}
+\renewcommand{\cftpartpagefont}{\sffamily\bfseries}
+\renewcommand{\cftchapfont}{\sffamily\bfseries}
+\renewcommand{\cftchappagefont}{\sffamily\bfseries}
+\renewcommand{\cftsecfont}{\sffamily}
+\renewcommand{\cftsecpagefont}{\sffamily}
+\renewcommand{\cftsubsecfont}{\sffamily}
+\renewcommand{\cftsubsecpagefont}{\sffamily}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+\setlength{\cftbeforechapskip}{.35em}
+\setlength{\cftsecnumwidth}{2.9em}
+
+% --- marcacoes de texto ----------------------------------------------
+% Nome do experimento. Nem Plex Serif nem Plex Sans trazem versalete, e
+% `\textsc` cairia em silencio na caixa normal. A marca e o semibold da
+% familia serifada, que existe nas duas larguras e nao colide com o
+% negrito, reservado a enfase.
+\newcommand{\exper}[1]{{\rmfamily\fontseries{sb}\selectfont #1}}
+\newcommand{\termo}[1]{\textbf{\textcolor{destaque}{#1}}}
+\newcommand{\campo}[1]{\par\smallskip\noindent\textbf{\textcolor{destaque}{#1.}}\space}
+
+% O corpo 7,4 da tabela e o 6,8 da nota fazem o LaTeX pedir matematica
+% a 3,7 pt, que a familia nao tem. As duas linhas abaixo fixam o piso em
+% 5 pt e deixam o log limpo.
+\DeclareMathSizes{7.4}{7.4}{6}{5}
+\DeclareMathSizes{6.8}{6.8}{6}{5}
+\newcommand{\tabfont}{\sffamily\fontsize{7.4}{9}\selectfont}
+\newcommand{\tabfontw}{\sffamily\fontsize{8}{10}\selectfont}
+% Coluna a esquerda que NAO desliga o diagnostico de caixa larga: com
+% `\rightskip` em `plus 1fil` o TeX nunca acusa Overfull, e conteudo
+% inquebravel vaza sobre a coluna vizinha em silencio.
+\newcommand{\rag}{\raggedright\rightskip=0pt plus 2em\relax\hbadness=10000 }
+\newcommand{\cab}[1]{\textbf{#1}}
+\newcommand{\notas}[1]{%
+  \par\vspace{0.4em}\noindent
+  \begin{minipage}{0.96\linewidth}\sffamily\fontsize{6.8}{8.6}\selectfont
+  \color{tinta2}#1\end{minipage}\par\vspace{0.3em}}
+
+\newlist{ficha}{description}{1}
+\setlist[ficha]{font=\normalfont\sffamily\fontsize{7.4}{9}\selectfont\bfseries,
+  leftmargin=1.9cm, labelwidth=1.6cm, labelsep=0.3cm, itemsep=0.1em,
+  topsep=0.45em, before=\sffamily\fontsize{7.4}{9}\selectfont}
+
+% Conclusao copiada do registro do experimento, nunca reescrita.
+\newcommand{\conclusao}[1]{%
+  \par\vspace{0.3em}\noindent
+  \begin{tabular}{@{}p{0.4em}@{\hspace{0.7em}}p{\dimexpr\linewidth-2.1em}@{}}
+  \textcolor{destaque}{\rule{0.35em}{1.6em}} &
+  \footnotesize\itshape #1\end{tabular}\par\vspace{0.5em}}
+
+% Objecao: o que limita ou contradiz o que se acabou de afirmar.
+\newenvironment{objecao}
+  {\par\smallskip\noindent\begin{tabular}{@{}p{0.4em}@{\hspace{0.7em}}p{\dimexpr\linewidth-2.1em}@{}}
+   \textcolor{fechada}{\rule{0.35em}{1.6em}} & \footnotesize}
+  {\end{tabular}\par\smallskip}
+
+% --- marca de vaga ----------------------------------------------------
+% O esqueleto compila e imprime o que falta. Ao preencher, o comando
+% sai inteiro. Uma varredura por `\pe` diz quanto do relatorio existe.
+\newcommand{\pe}[2][]{%
+  {\sffamily\fontsize{8}{10}\selectfont\color{tinta2}%
+   $\langle$\,\ifx\relax#1\relax\else\textbf{#1}: \fi #2\,$\rangle$}}
+\newcommand{\pepar}[2][]{\par\noindent\pe[#1]{#2}\par}
+
+% --- apendice deitado -------------------------------------------------
+% Prosa em uma coluna dentro do apendice: a mancha deitada tem 25,3 cm,
+% que dariam 145 caracteres por linha, e este bloco a fixa em 15 cm.
+\newenvironment{promancha}
+  {\par\noindent\begin{minipage}{15cm}}
+  {\end{minipage}\par\medskip}
+
+\RequirePackage{siunitx}
+\sisetup{output-decimal-marker={,},group-separator={\,},
+         group-minimum-digits=4,separate-uncertainty=true}
+
+\RequirePackage[hidelinks]{hyperref}
+
+\setlength{\emergencystretch}{2.5em}
+\endinput
