@@ -203,6 +203,70 @@
 \setlength{\cftbeforechapskip}{.35em}
 \setlength{\cftsecnumwidth}{2.9em}
 
+% --- abertura -------------------------------------------------------
+% A abertura de um documento avulso da linha: marca a esquerda, titulo e
+% linha de contexto a direita, e um fio da cor de destaque fechando.
+%
+% Fica aqui, e nao no corpo de cada `.tex`, porque e o que faz destes
+% arquivos um modelo e nao quatro aberturas parecidas. Um documento novo
+% preenche os tres campos e nao decide mais nada de forma.
+%
+% A marca e brasao hexagonal escuro, e nao logotipo horizontal. Abaixo de
+% uns 12 mm o "EARTH OBSERVATION" fecha e vira mancha; os 15 mm de
+% `\marcalargura` sao o menor tamanho em que a palavra TERRA ainda se le,
+% que e o que precisa ser lido. Nao encolha sem olhar impresso.
+%
+%   \marca{../terra-mark.png}          % ja e o valor de fabrica
+%   \autoria{Nome}{correio@dominio}    % opcional; sem isso a linha some
+%   \abertura{Titulo}{Registro de ... \textbackslash{} data \textbackslash{} arquivo}
+%
+% `\abertura` ja embute o `\twocolumn[...]`, entao chame-a no lugar dele,
+% logo depois do `\begin{document}`.
+\newlength{\marcalargura}\setlength{\marcalargura}{15mm}
+\newlength{\marcarespiro}\setlength{\marcarespiro}{5mm}
+
+\newcommand{\re@marca}{../terra-mark.png}
+\newcommand{\marca}[1]{\renewcommand{\re@marca}{#1}}
+
+\newcommand{\re@autor}{}
+\newcommand{\re@correio}{}
+\newcommand{\autoria}[2]{\renewcommand{\re@autor}{#1}\renewcommand{\re@correio}{#2}}
+
+% O correio vira `mailto:`. `hyperref` entra com `hidelinks`, entao ele
+% clica sem pintar de azul nem emoldurar, e o PDF impresso nao muda.
+\newcommand{\re@assinatura}{%
+  \ifx\re@autor\@empty\else
+    {\sffamily\fontsize{8.4}{10.4}\selectfont\color{tinta2}%
+     \re@autor
+     \ifx\re@correio\@empty\else
+       \ \textperiodcentered\ \href{mailto:\re@correio}{\texttt{\re@correio}}%
+     \fi\par}%
+  \fi}
+
+\newcommand{\abertura}[2]{%
+  \twocolumn[{%
+    \vspace*{-0.4em}%
+    \noindent
+    % A marca alinha pelo pe do bloco de texto, e nao pelo topo: o titulo
+    % pode ocupar uma ou duas linhas e o conjunto nao balanca.
+    \begin{minipage}[b]{\marcalargura}%
+      \includegraphics[width=\marcalargura]{\re@marca}%
+    \end{minipage}%
+    \hspace{\marcarespiro}%
+    \begin{minipage}[b]{\dimexpr\textwidth-\marcalargura-\marcarespiro\relax}%
+      {\sffamily\bfseries\LARGE\hyphenpenalty=10000\exhyphenpenalty=10000
+       \raggedright #1\par}%
+      \vspace{0.35em}%
+      {\sffamily\fontsize{9}{11}\selectfont\color{tinta2}\raggedright #2\par}%
+      \vspace{0.25em}%
+      \re@assinatura
+    \end{minipage}%
+    \vspace{0.7em}\par
+    \noindent{\color{destaque}\rule{\textwidth}{0.6pt}}%
+    \vspace{1.0em}%
+  }]%
+}
+
 % --- marcacoes de texto ----------------------------------------------
 % Nome do experimento. Nem Plex Serif nem Plex Sans trazem versalete, e
 % `\textsc` cairia em silencio na caixa normal. A marca e o semibold da
