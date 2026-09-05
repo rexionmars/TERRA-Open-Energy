@@ -106,7 +106,40 @@
 \RequirePackage{longtable}
 \RequirePackage{pdflscape}
 \RequirePackage{enumitem}
-\RequirePackage{amsmath,amssymb}
+% MATEMATICA. Com o corpo serifado, o Computer Modern da matematica
+% passava despercebido. Contra a Urbanist ele denuncia: na tabela de
+% resultado os numeros com sinal, que sao matematica, saiam serifados, e
+% os sem sinal, que sao texto, nao. Lado a lado na mesma linha.
+%
+% A matematica daqui nao passa de numero com sinal, `\cdot`, `\le` e uma
+% barra: nada que exija `amssymb`. Entao no motor unicode o `unicode-math`
+% entra no lugar dele e traz digito e letra da propria Urbanist, deixando
+% operador e delimitador com o Latin Modern Math, neutro o bastante para
+% um menos. Em pdflatex nada muda: o corpo ali continua Plex Serif e o
+% Computer Modern nao destoa.
+%
+% `unicode-math` e `amssymb` colidem -- os dois definem `\eth`,
+% `\digamma`, `\backepsilon` --, por isso a carga e exclusiva.
+\ifPDFTeX
+  \RequirePackage{amsmath,amssymb}
+\else
+  \RequirePackage{amsmath}
+  \RequirePackage{unicode-math}
+  \setmathfont{Latin Modern Math}
+  % O nome da familia nao resolve aqui como resolve no `\setmainfont`:
+  % `\setmathfont` nao le as chaves de face, entao o arquivo vai direto.
+  \setmathfont{Urbanist-Regular.ttf}[Path=fontes/urbanist/, Scale=1.032,
+    range={up/{latin,Latin,num}}]
+  \setmathfont{Urbanist-Italic.ttf}[Path=fontes/urbanist/, Scale=1.032,
+    range={it/{latin,Latin}}]
+  % Os quatro simbolos que este documento usa a Urbanist tem, entao o
+  % Latin Modern fica so de rede: menos, mais, ponto medio, `\le` e a
+  % barra saem da propria fonte. O menos importa em particular -- o do
+  % Latin Modern e longo o bastante para se confundir com o travessao
+  % que a tabela usa como "nao se aplica".
+  \setmathfont{Urbanist-Regular.ttf}[Path=fontes/urbanist/, Scale=1.032,
+    range={"2212,"002B,"00B7,"2264,"007C}]
+\fi
 \RequirePackage{microtype}
 \RequirePackage{caption}
 \RequirePackage{tocloft}
