@@ -37,10 +37,67 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{estilo-reporte}[2026/09/01 Relatorio de andamento TERRA-Simulation]
 
-\RequirePackage[T1]{fontenc}
-\RequirePackage{plex-serif}
-\RequirePackage[scale=.96]{plex-sans}
-\RequirePackage[scale=.92]{plex-mono}
+% FAMILIAS. Dependem do motor, porque a Urbanist nao existe empacotada
+% no CTAN: e um TTF do Google Fonts, e so `fontspec` le TTF solto. Um
+% pacote CTAN traria a fonte tambem em Type 1 com codificacao T1, que e
+% o que o pdflatex consome; o TTF nao serve para ele.
+%
+%   pdflatex           -> IBM Plex Serif + IBM Plex Sans (antigo)
+%   lualatex/xelatex   -> Urbanist no corpo e nos titulos
+%
+% O `reporte.tex` continua saindo em pdflatex sem alteracao; quem quiser
+% Urbanist troca o motor no proprio documento. `Path` e relativo ao
+% diretorio de compilacao, entao compile de dentro de `report/`.
+%
+% A monoespacada e Plex Mono nos dois casos. Sem serifa vizinha ela
+% destoa mais do que destoava, e isso e aceito: o `\texttt` aqui marca
+% nome de arquivo e de coluna, e destacar e a funcao dele.
+%
+% ESCALAS. Casadas pela altura-x, e nao pelo corpo nominal, e as duas
+% saem da mesma conta. Plex Serif e Plex Sans tem altura-x de 0,516 em;
+% a sans rodava a .96, logo 0,4954 efetivo contra 0,516 do corpo. A
+% Urbanist tem 0,500, entao precisa de 0,516/0,500 = 1,032 no corpo e de
+% 0,4954/0,500 = 0,99 na sans. A razao entre as duas fica em 0,959, que
+% reproduz o .96 anterior: a hierarquia optica nao se mexe.
+%
+% MEDIDA DE LINHA. Medida nos dois, sobre a mesma frase de 134
+% caracteres: Plex Serif da 4,891 pt por caractere e Urbanist a 1,032 da
+% 4,727. Na coluna de 8,25 cm sao 48,0 e 49,7 caracteres por linha. A
+% troca alarga a linha em 3,4% e continua dentro da faixa de 45 a 60.
+%
+% RESSALVA. Urbanist e geometrica de altura-x baixa, desenhada para
+% display. Em duas colunas densas ela cansa mais que a Plex Serif ao
+% longo de muitas paginas. Cabe num registro de execucao de duas ou tres
+% paginas; se este documento crescer, a escolha merece ser revista.
+\RequirePackage{iftex}
+\ifPDFTeX
+  \RequirePackage[T1]{fontenc}
+  \RequirePackage{plex-serif}
+  \RequirePackage[scale=.96]{plex-sans}
+  \RequirePackage[scale=.92]{plex-mono}
+\else
+  \RequirePackage[scale=.92]{plex-mono}
+  \RequirePackage{fontspec}
+  % A Urbanist chega como fonte variavel; `fontes/urbanist/` guarda as
+  % instancias estaticas geradas do eixo `wght`, mais os dois arquivos
+  % variaveis de origem e a licenca OFL, que a licenca exige distribuir.
+  \defaultfontfeatures[Urbanist]{
+    Path            = fontes/urbanist/,
+    Extension       = .ttf,
+    UprightFont     = *-Regular,
+    ItalicFont      = *-Italic,
+    BoldFont        = *-Bold,
+    BoldItalicFont  = *-BoldItalic,
+    FontFace        = {l}{n}{*-Light},
+    FontFace        = {l}{it}{*-LightItalic},
+    FontFace        = {mb}{n}{*-Medium},
+    FontFace        = {mb}{it}{*-MediumItalic},
+    FontFace        = {sb}{n}{*-SemiBold},
+    FontFace        = {sb}{it}{*-SemiBoldItalic},
+  }
+  \setmainfont{Urbanist}[Scale=1.032]
+  \setsansfont{Urbanist}[Scale=0.99]
+\fi
 
 \RequirePackage{xcolor}
 \RequirePackage{graphicx}
