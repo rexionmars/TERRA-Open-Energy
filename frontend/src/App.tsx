@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react"
 import { Map as MapLibreMap, NavigationControl, type StyleSpecification } from "maplibre-gl"
-import { Ping } from "../wailsjs/go/main/App"
+import { EventsOn } from "../wailsjs/runtime/runtime"
+import { Ping, RevealMainWindow } from "../wailsjs/go/main/App"
+import { SplashScreen } from "./components/SplashScreen"
 
 /*
   Esri World Imagery, one of the basemaps TERRA offers. The webview requests the
@@ -24,6 +26,22 @@ const BASEMAP: StyleSpecification = {
 
 // Centroid of Brazil's territory, at a zoom that shows all of it.
 const INITIAL_VIEW = { center: [-51.9, -14.2] as [number, number], zoom: 3.5 }
+
+// Duration of .splash-screen--exit in index.css.
+const SPLASH_EXIT_MS = 480
+
+/*
+  The backstop for a boot:ready that never arrives. The boot probe caps itself
+  at eight seconds and the splash minimum is three, so past this something is
+  stuck and the window opens anyway.
+*/
+const BOOT_BACKSTOP_MS = 12_000
+
+/*
+  macOS draws the traffic lights over the top-left of the content, because the
+  window uses a hidden title bar. The header leaves them room there only.
+*/
+const IS_MAC = navigator.userAgent.includes("Mac")
 
 function MapView() {
   const container = useRef<HTMLDivElement>(null)
@@ -86,17 +104,21 @@ function SidecarIndicator() {
     state.kind === "ready" ? state.python : state.kind === "failed" ? state.message : undefined
 
   return (
-    <div className="flex items-center gap-2 text-xs text-muted" title={detail}>
+    <div className="app-no-drag flex items-center gap-2 text-xs text-muted" title={detail}>
       <span className={`h-2 w-2 rounded-full ${dot}`} aria-hidden="true" />
       <span>{label}</span>
     </div>
   )
 }
 
-export default function App() {
+function MainWindow() {
   return (
-    <div className="flex h-full flex-col">
-      <header className="flex h-10 shrink-0 items-center justify-between border-b border-line bg-raised px-4">
+    <div className="app-shell-enter flex h-full flex-col">
+      <header
+        className={`app-draggable flex h-10 shrink-0 items-center justify-between border-b border-line bg-raised pr-4 ${
+          IS_MAC ? "pl-20" : "pl-4"
+        }`}
+      >
         <span className="text-xs font-semibold tracking-[0.18em]">TERRA ENERGY ENGINE</span>
         <SidecarIndicator />
       </header>
@@ -105,4 +127,46 @@ export default function App() {
       </main>
     </div>
   )
+}
+
+export default function App() {
+  const [booting, setBooting] = useState(true)
+  const [exiting, setExiting] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    let started = false
+    let exitTimer: number | undefined
+    let revealTimer: number | undefined
+
+    const finish = () => {
+      if (cancelled || started) return
+      started = true
+      setExiting(true)
+      exitTimer = window.setTimeout(async () => {
+        if (cancelled) return
+        try {
+          await RevealMainWindow()
+        } catch {
+          /* the main window still mounts at splash size */
+        }
+        // Lets the OS settle the maximised frame before the map measures it.
+        revealTimer = window.setTimeout(() => {
+          if (!cancelled) setBooting(false)
+        }, 120)
+      }, SPLASH_EXIT_MS)
+    }
+
+    const off = EventsOn("boot:ready", finish)
+    const backstop = window.setTimeout(finish, BOOT_BACKSTOP_MS)
+    return () => {
+      cancelled = true
+      off()
+      window.clearTimeout(backstop)
+      window.clearTimeout(exitTimer)
+      window.clearTimeout(revealTimer)
+    }
+  }, [])
+
+  return booting ? <SplashScreen exiting={exiting} /> : <MainWindow />
 }

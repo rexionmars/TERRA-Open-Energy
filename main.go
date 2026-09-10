@@ -24,17 +24,27 @@ func main() {
 	app := NewApp()
 
 	err := wails.Run(&options.App{
-		Title:            "TERRA Energy Engine",
-		Width:            1280,
-		Height:           800,
-		MinWidth:         960,
-		MinHeight:        600,
+		Title: "TERRA Energy Engine",
+		// Splash-sized. RevealMainWindow raises the limits and maximises the
+		// window once boot:ready has been handled.
+		Width:            420,
+		Height:           280,
+		MinWidth:         360,
+		MinHeight:        220,
+		AlwaysOnTop:      true,
 		BackgroundColour: &options.RGBA{R: 23, G: 23, B: 23, A: 1},
 		AssetServer:      &assetserver.Options{Assets: assets},
 		OnStartup:        app.startup,
+		OnDomReady:       app.domReady,
 		OnShutdown:       app.shutdown,
 		Bind:             []interface{}{app},
 		Mac: &mac.Options{
+			// A titled window with a transparent, title-less bar and full-size
+			// content: the splash has no title strip above it, and the main
+			// header sits beside the traffic lights. Frameless would also
+			// remove the title strip, but TERRA measured it degrading the
+			// compositing of every other window sharing its space.
+			TitleBar:   mac.TitleBarHidden(),
 			Appearance: mac.NSAppearanceNameDarkAqua,
 		},
 	})

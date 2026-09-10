@@ -29,3 +29,165 @@ body {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+
+/* Window drag regions, read by the Wails runtime rather than by the style mask. */
+.app-draggable {
+  --wails-draggable: drag;
+}
+.app-no-drag {
+  --wails-draggable: no-drag;
+}
+
+/* ---- Splash ---------------------------------------------------------------- */
+
+/* Splash to main window handoff. SPLASH_EXIT_MS in App.tsx matches 480ms. */
+.splash-screen {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 480ms ease,
+    transform 480ms ease;
+}
+.splash-screen--exit {
+  opacity: 0;
+  transform: scale(0.96);
+  pointer-events: none;
+}
+
+.splash-logo {
+  filter: drop-shadow(0 2px 12px rgb(0 0 0 / 0.55));
+}
+.splash-brand {
+  text-shadow: 0 1px 8px rgb(0 0 0 / 0.65);
+}
+.splash-eyebrow {
+  text-shadow: 0 1px 6px rgb(0 0 0 / 0.55);
+}
+.splash-log {
+  text-shadow: 0 1px 6px rgb(0 0 0 / 0.75);
+}
+.splash-led {
+  animation: splash-blink 1.2s ease-in-out infinite;
+}
+@keyframes splash-blink {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/*
+  Ken Burns pan behind the splash. Four seconds, timed against the splash, which
+  is held for three (minSplash in app.go) plus the fade, so the move is mostly
+  complete within the window and still has room if a boot runs long.
+*/
+.splash-kenburns {
+  position: absolute;
+  inset: -8%;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 1.35s ease;
+  will-change: transform, opacity;
+}
+.splash-kenburns.is-active {
+  opacity: 1;
+  z-index: 1;
+}
+.splash-kenburns.is-active.splash-kenburns--1 {
+  animation: splash-kenburns-a 4s ease-out forwards;
+}
+.splash-kenburns.is-active.splash-kenburns--2 {
+  animation: splash-kenburns-b 4s ease-out forwards;
+}
+.splash-kenburns.is-active.splash-kenburns--3 {
+  animation: splash-kenburns-c 4s ease-out forwards;
+}
+@keyframes splash-kenburns-a {
+  from {
+    transform: scale(1.05) translate(0%, 0%);
+  }
+  to {
+    transform: scale(1.22) translate(-3%, -2%);
+  }
+}
+@keyframes splash-kenburns-b {
+  from {
+    transform: scale(1.08) translate(2%, -1%);
+  }
+  to {
+    transform: scale(1.24) translate(-2%, 2%);
+  }
+}
+@keyframes splash-kenburns-c {
+  from {
+    transform: scale(1.06) translate(-2%, 1%);
+  }
+  to {
+    transform: scale(1.2) translate(2.5%, -1.5%);
+  }
+}
+
+/*
+  The scrim between the still and the text: darker at the centre, where the
+  mark and the release line sit, and at the foot, where the boot line is small
+  and carries the least shadow. The values are a starting point and have not
+  been measured against these stills; TERRA's index.css describes how to
+  measure them (brightest pixel in each text band against the text colour).
+*/
+.splash-kenburns-scrim {
+  z-index: 2;
+  background:
+    radial-gradient(
+      ellipse 70% 60% at 50% 45%,
+      rgb(23 23 23 / 0.5) 0%,
+      rgb(23 23 23 / 0.62) 55%,
+      rgb(23 23 23 / 0.74) 100%
+    ),
+    linear-gradient(to bottom, rgb(23 23 23 / 0) 60%, rgb(23 23 23 / 0.7) 100%);
+}
+
+/*
+  Reduced motion keeps the still, the scrim and the brand, and stops only the
+  movement: a full-bleed zoom-and-pan is what the setting exists to turn off.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .splash-kenburns.is-active.splash-kenburns--1,
+  .splash-kenburns.is-active.splash-kenburns--2,
+  .splash-kenburns.is-active.splash-kenburns--3 {
+    animation: none;
+    transform: scale(1.04);
+  }
+  .splash-screen,
+  .splash-screen--exit {
+    transition: opacity 480ms ease;
+    transform: none;
+  }
+  .splash-led {
+    animation: none;
+    opacity: 0.85;
+  }
+}
+
+/* The main window fades in once the splash has gone. */
+.app-shell-enter {
+  animation: app-shell-enter 320ms ease-out;
+}
+@keyframes app-shell-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell-enter {
+    animation: none;
+  }
+}
