@@ -7,10 +7,14 @@ import {
   MagnifyingGlassPlus,
   Question,
   SidebarSimple,
+  SignOut,
   TerminalWindow,
+  UserCircle,
   type Icon,
 } from "@phosphor-icons/react"
+import { account, errorMessage, logout } from "./account"
 import { clearLog, print } from "./commandLog"
+import { openDocument } from "./documents"
 import { togglePanel } from "./layout"
 import { flyHome, resetNorth, zoomIn, zoomOut } from "./mapController"
 import { checkSidecar } from "./sidecarStatus"
@@ -83,6 +87,32 @@ export const COMMANDS: Command[] = [
       const s = await checkSidecar()
       if (s.kind === "ready") print(`Sidecar ready · Python ${s.version} · ${s.python}`)
       else if (s.kind === "failed") print(`Sidecar unavailable: ${s.message}`, "error")
+    },
+  },
+  {
+    name: "ACCOUNT",
+    aliases: ["PROFILE"],
+    label: "Account",
+    description: "Open the account tab: sign in, or edit the signed-in profile",
+    icon: UserCircle,
+    run: () => openDocument("account"),
+  },
+  {
+    name: "LOGOUT",
+    aliases: ["SIGNOUT"],
+    label: "Sign Out",
+    description: "Sign out and continue as the guest",
+    icon: SignOut,
+    run: async () => {
+      if (!account.get().user) {
+        print("Not signed in; working as the guest.", "error")
+        return
+      }
+      try {
+        await logout()
+      } catch (e) {
+        print(`Sign out failed: ${errorMessage(e)}`, "error")
+      }
     },
   },
   {

@@ -30,6 +30,7 @@ export const RIBBON: RibbonTab[] = [
         ],
       },
       { title: "Sidecar", items: [{ command: "PING" }] },
+      { title: "Account", items: [{ command: "ACCOUNT" }] },
     ],
   },
   {

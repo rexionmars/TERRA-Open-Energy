@@ -1,8 +1,12 @@
 import { useEffect, useRef } from "react"
+import { X } from "@phosphor-icons/react"
+import { loadAccount } from "../../lib/account"
 import { print } from "../../lib/commandLog"
+import { DOCUMENT_TITLES, activateDocument, closeDocument, documents } from "../../lib/documents"
 import { panels } from "../../lib/layout"
 import { checkSidecar } from "../../lib/sidecarStatus"
 import { useStore } from "../../lib/store"
+import { AccountDocument } from "../account/AccountDocument"
 import { CommandLine } from "./CommandLine"
 import { PropertiesPanel } from "./PropertiesPanel"
 import { RibbonBar } from "./RibbonBar"
@@ -18,14 +22,48 @@ let greeted = false
 // canvas keeps focus for those.
 const COMMAND_KEY = /^[a-z?]$/i
 
+function DocumentTabs() {
+  const { open, active } = useStore(documents)
+  return (
+    <nav aria-label="Documents" className="flex h-8 shrink-0 items-end gap-0.5 border-b border-line bg-chrome px-2">
+      {open.map((id) => {
+        const isActive = id === active
+        return (
+          <span
+            key={id}
+            className={`flex items-center rounded-t border-x border-t text-xs ${
+              isActive ? "border-line border-t-accent bg-surface text-ink" : "border-transparent text-muted hover:text-ink"
+            }`}
+          >
+            <button type="button" onClick={() => activateDocument(id)} className="py-1 pl-4 pr-3">
+              {DOCUMENT_TITLES[id]}
+            </button>
+            {id !== "map" && (
+              <button
+                type="button"
+                onClick={() => closeDocument(id)}
+                aria-label={`Close ${DOCUMENT_TITLES[id]}`}
+                className="mr-1.5 rounded-sm p-0.5 text-muted hover:bg-hover hover:text-ink"
+              >
+                <X size={10} aria-hidden="true" />
+              </button>
+            )}
+          </span>
+        )
+      })}
+    </nav>
+  )
+}
+
 /**
- * The main window: ribbon, document tabs, properties beside the viewport,
- * command line, status bar. The arrangement follows desktop CAD, where the
- * drawing stays in the middle and every tool is reachable both from the ribbon
- * and by typing its name.
+ * The main window: ribbon, document tabs, the active document, command line,
+ * status bar. The arrangement follows desktop CAD, where the drawing stays in
+ * the middle and every tool is reachable both from the ribbon and by typing
+ * its name.
  */
 export function Workbench() {
   const shown = useStore(panels)
+  const { active } = useStore(documents)
   const commandInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -35,6 +73,7 @@ export function Workbench() {
       print("Type a command or use the ribbon. HELP lists the commands.")
     }
     void checkSidecar()
+    void loadAccount()
   }, [])
 
   // Typing a command name anywhere starts it on the command line, as in CAD.
@@ -54,14 +93,17 @@ export function Workbench() {
   return (
     <div className="app-shell-enter flex h-full flex-col bg-surface text-ink">
       <RibbonBar />
-      <nav aria-label="Documents" className="flex h-8 shrink-0 items-end border-b border-line bg-chrome px-2">
-        <span className="rounded-t border-x border-t border-line border-t-accent bg-surface px-4 py-1 text-xs text-ink">
-          Map
-        </span>
-      </nav>
+      <DocumentTabs />
       <div className="flex min-h-0 flex-1">
-        {shown.properties && <PropertiesPanel />}
-        <Viewport />
+        {/*
+          The map stays mounted while another document is in front. Unmounting
+          it would release its WebGL context and reload every tile on return.
+        */}
+        <div className={active === "map" ? "flex min-h-0 min-w-0 flex-1" : "hidden"}>
+          {shown.properties && <PropertiesPanel />}
+          <Viewport />
+        </div>
+        {active === "account" && <AccountDocument />}
       </div>
       {shown.commandLine && <CommandLine inputRef={commandInput} />}
       <StatusBar />

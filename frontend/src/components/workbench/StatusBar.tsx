@@ -1,5 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react"
 import { GetAppVersion } from "../../../wailsjs/go/main/App"
+import { account } from "../../lib/account"
+import { runCommand } from "../../lib/commands"
 import { formatLat, formatLng } from "../../lib/format"
 import { cursor, mapView } from "../../lib/mapController"
 import { sidecar } from "../../lib/sidecarStatus"
@@ -47,6 +49,20 @@ function SidecarCell() {
   )
 }
 
+function UserCell() {
+  const { user } = useStore(account)
+  return (
+    <button
+      type="button"
+      onClick={() => void runCommand("ACCOUNT")}
+      title={user ? user.email : "Working as the guest. Open the Account tab to sign in."}
+      className="flex h-full items-center border-l border-line px-2.5 hover:bg-hover hover:text-ink"
+    >
+      {user ? user.display_name : "Guest"}
+    </button>
+  )
+}
+
 export function StatusBar() {
   const [version, setVersion] = useState<string | null>(null)
 
@@ -69,6 +85,7 @@ export function StatusBar() {
       <CursorCell />
       <ZoomCell />
       <SidecarCell />
+      <UserCell />
       {version && <Cell>v{version}</Cell>}
     </footer>
   )

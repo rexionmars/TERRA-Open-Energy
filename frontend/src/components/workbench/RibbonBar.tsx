@@ -1,9 +1,27 @@
 import { useState } from "react"
+import { account } from "../../lib/account"
 import { findCommand, runCommand } from "../../lib/commands"
 import { panels } from "../../lib/layout"
 import { IS_MAC } from "../../lib/platform"
 import { useStore } from "../../lib/store"
+import { Avatar } from "../account/Avatar"
 import { RIBBON, type RibbonItem } from "./ribbon"
+
+/** The signed-in account at the end of the tab row; opens the Account tab. */
+function AccountButton() {
+  const { user } = useStore(account)
+  return (
+    <button
+      type="button"
+      onClick={() => void runCommand("ACCOUNT")}
+      title={user ? `${user.display_name} · ${user.email}` : "Sign in"}
+      className="app-no-drag relative mb-1.5 ml-auto flex items-center gap-2 rounded-full py-0.5 pl-0.5 pr-2.5 text-xs text-muted hover:bg-hover hover:text-ink"
+    >
+      <Avatar user={user} size={22} />
+      {user ? user.display_name : "Sign in"}
+    </button>
+  )
+}
 
 function RibbonButton({ item }: { item: RibbonItem }) {
   const shown = useStore(panels)
@@ -71,6 +89,7 @@ export function RibbonBar() {
         <span className="pointer-events-none absolute inset-x-0 top-0 flex h-9 items-center justify-center text-xs text-muted">
           TERRA Energy Engine
         </span>
+        <AccountButton />
       </div>
 
       <div role="tabpanel" className="flex h-[94px] items-stretch bg-raised px-1">
