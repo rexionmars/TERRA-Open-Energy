@@ -4,11 +4,21 @@
   Neutral surfaces, with hue reserved for the accent and for data. Each token
   becomes a Tailwind utility: --color-surface gives bg-surface, text-surface,
   border-surface, and so on.
+
+  Five surface levels, darkest first: sunken (input wells, the command line),
+  surface (the viewport), chrome (ribbon tabs, status bar), panel (properties)
+  and raised (the ribbon body, section headers). Adjacent regions differ by a
+  level, so most boundaries read without needing a border to draw them.
 */
 @theme {
+  --color-sunken: rgb(17 17 17);
   --color-surface: rgb(23 23 23);
+  --color-chrome: rgb(28 28 28);
+  --color-panel: rgb(32 32 32);
   --color-raised: rgb(38 38 38);
+  --color-hover: rgb(52 52 52);
   --color-line: rgb(64 64 64);
+  --color-info: rgb(147 197 253);
   --color-ink: rgb(229 229 229);
   --color-muted: rgb(163 163 163);
   --color-accent: rgb(59 130 246);
