@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+/*
+  Neutral surfaces, with hue reserved for the accent and for data. Each token
+  becomes a Tailwind utility: --color-surface gives bg-surface, text-surface,
+  border-surface, and so on.
+*/
+@theme {
+  --color-surface: rgb(23 23 23);
+  --color-raised: rgb(38 38 38);
+  --color-line: rgb(64 64 64);
+  --color-ink: rgb(229 229 229);
+  --color-muted: rgb(163 163 163);
+  --color-accent: rgb(59 130 246);
+  --color-ok: rgb(74 222 128);
+  --color-fail: rgb(248 113 113);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
