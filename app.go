@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/rexionmars/TerraEnergyEngine/internal/sidecar"
+	"github.com/rexionmars/TerraEnergyEngine/internal/store"
 
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -20,6 +21,16 @@ type App struct {
 	runner *sidecar.Runner
 	// Why the runner could not be built; reported in place of a probe result.
 	runnerErr error
+
+	// The local account database, written once in startup. Nil when it could
+	// not be opened; accountsErr then says why, and the bindings report it.
+	accounts    *store.Store
+	accountsErr error
+
+	// The signed-in account, or nil for the guest. Written by the account
+	// bindings, each of which Wails runs on its own goroutine.
+	userMu sync.RWMutex
+	user   *store.User
 
 	bootMu      sync.Mutex
 	bootLogs    []string
@@ -51,6 +62,7 @@ const (
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	wruntime.WindowCenter(ctx)
+	a.openAccounts()
 	a.bootLog("resolving sidecar…")
 	a.runner, a.runnerErr = sidecar.NewRunner()
 	if a.runnerErr != nil {
@@ -72,6 +84,9 @@ func (a *App) domReady(ctx context.Context) {
 func (a *App) shutdown(context.Context) {
 	if a.runner != nil {
 		a.runner.Cancel()
+	}
+	if a.accounts != nil {
+		_ = a.accounts.Close()
 	}
 }
 
